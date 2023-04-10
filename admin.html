@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Adicionar Aviso</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- Bootstrap -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
+	<!-- Firebase -->
+	<script src="https://www.gstatic.com/firebasejs/8.3.3/firebase-app.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/8.3.3/firebase-database.js"></script>
+
+	<!-- Configuração do Firebase -->
+	<script>
+		var firebaseConfig = {
+			apiKey: "AIzaSyBkrBLKuklZgPm1nz2G997ULiYycZMb9F8",
+      authDomain: "avisoseeventos.firebaseapp.com",
+      databaseURL: "https://avisoseeventos-default-rtdb.firebaseio.com",
+      projectId: "avisoseeventos",
+      storageBucket: "avisoseeventos.appspot.com",
+      messagingSenderId: "247706769451",
+      appId: "1:247706769451:web:ce31cd9d0ca22cd267b26e",
+      measurementId: "G-QE1Z4RQ60T"
+		};
+		// Inicialização do Firebase
+		firebase.initializeApp(firebaseConfig);
+		var database = firebase.database();
+	</script>
+</head>
+<body>
+	<div class="container">
+		<h2>Adicionar Aviso</h2>
+		<form>
+			<div class="form-group">
+				<label for="titulo">Título:</label>
+				<input type="text" class="form-control" id="titulo" name="titulo">
+			</div>
+			<div class="form-group">
+				<label for="dia">Dia:</label>
+				<select class="form-control" id="dia" name="dia">
+					<option value="Segunda-feira">Segunda-feira</option>
+					<option value="Terça-feira">Terça-feira</option>
+					<option value="Quarta-feira">Quarta-feira</option>
+					<option value="Quinta-feira">Quinta-feira</option>
+					<option value="Sexta-feira">Sexta-feira</option>
+					<option value="Sábado">Sábado</option>
+					<option value="Domingo">Domingo</option>
+				</select>
+			</div>
+			<div class="form-group">
+				<label for="data">Data:</label>
+				<input type="date" class="form-control" id="data" name="data">
+			</div>
+			<div class="form-group">
+				<label for="hora">Hora:</label>
+				<input type="time" class="form-control" id="hora" name="hora">
+			</div>
+			<div class="form-group">
+				<label for="observacoes">Observações:</label>
+				<textarea class="form-control" id="observacoes" name="observacoes"></textarea>
+			</div>
+			<button type="button" class="btn btn-primary" onclick="salvarAviso()">Salvar</button>
+		</form>
+	</div>
+
+	<script>
+  // autenticação
+  function fazerLogin() {
+    const email = document.getElementById("email").value;
+    const senha = document.getElementById("senha").value;
+
+    firebase.auth().signInWithEmailAndPassword(email, senha)
+      .then((userCredential) => {
+        // usuário autenticado com sucesso
+        const user = userCredential.user;
+        console.log("Usuário autenticado: ", user);
+      })
+      .catch((error) => {
+        // erro ao autenticar
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.log("Erro ao autenticar: ", errorMessage);
+      });
+  }
+
+  // salvar dados
+  function salvarAviso() {
+    const titulo = document.getElementById("titulo").value;
+    const dia = document.getElementById("dia").value;
+    const data = document.getElementById("data").value;
+    const hora = document.getElementById("hora").value;
+    const observacoes = document.getElementById("observacoes").value;
+
+    // cria um objeto com os dados a serem enviados
+    const dados = {
+      titulo: titulo,
+      dia: dia,
+      data: data,
+      hora: hora,
+      observacoes: observacoes
+    };
+
+    // salva os dados no Firebase
+    firebase.database().ref("avisos").push(dados)
+      .then(() => {
+        // dados salvos com sucesso
+        console.log("Aviso salvo com sucesso!");
+      })
+      .catch((error) => {
+        // erro ao salvar os dados
+        console.log("Erro ao salvar aviso: ", error);
+      });
+  }
+
+  // editar dados
+  function editarAviso(id) {
+    // implementar função de edição aqui
+    console.log("Editar aviso com ID: ", id);
+  }
+
+  // excluir dados
+  function excluirAviso(id) {
+    // implementar função de exclusão aqui
+    console.log("Excluir aviso com ID: ", id);
+  }
+</script>
+
+<!-- lista de avisos -->
+<div class="container">
+  <h2>Avisos Semanais</h2>
+  <ul id="lista-avisos"></ul>
+</div>
+
+<script>
+  // exibir lista de avisos
+  const listaAvisos = document.getElementById("lista-avisos");
+  firebase.database().ref("avisos").on("value", (snapshot) => {
+    listaAvisos.innerHTML = "";
+    snapshot.forEach((childSnapshot) => {
+      const childKey = childSnapshot.key;
+      const childData = childSnapshot.val();
+      const listItem = document.createElement("li");
+      listItem.innerHTML = ` ${childData.dia} - ${childData.titulo} - ${childData.data} - ${childData.hora} - ${childData.observacoes} 
+      <button onclick="editarAviso('${childKey}')">Editar</button> <button onclick="excluirAviso('${childKey}')">Excluir</button>`;
+      listaAvisos.appendChild(listItem);
+    });
+  });
+
+
+
+  function editarAviso(id) {
+  const ref = database.ref("avisos/" + id);
+  ref.once("value", function(snapshot) {
+    const aviso = snapshot.val();
+    document.getElementById("titulo").value = aviso.titulo;
+    document.getElementById("data").value = aviso.data;
+    document.getElementById("mensagem").value = aviso.mensagem;
+    document.getElementById("btn-salvar").style.display = "none";
+    document.getElementById("btn-atualizar").style.display = "inline-block";
+    document.getElementById("btn-excluir").style.display = "inline-block";
+    document.getElementById("btn-atualizar").onclick = function() {
+      atualizarAviso(id);
+    }
+    document.getElementById("btn-excluir").onclick = function() {
+      excluirAviso(id);
+    }
+  });
+}
+
+function atualizarAviso(id) {
+  const titulo = document.getElementById("titulo").value;
+  const data = document.getElementById("data").value;
+  const mensagem = document.getElementById("mensagem").value;
+
+  const dados = {
+    titulo: titulo,
+    data: data,
+    mensagem: mensagem
+  };
+
+  const ref = database.ref("avisos/" + id);
+  ref.update(dados);
+
+  alert("Aviso atualizado com sucesso!");
+
+  limparCampos();
+}
+
+function excluirAviso(id) {
+  const ref = database.ref("avisos/" + id);
+  ref.remove();
+
+  alert("Aviso excluído com sucesso!");
+
+  limparCampos();
+}
+
+function limparCampos() {
+  document.getElementById("titulo").value = "";
+  document.getElementById("data").value = "";
+  document.getElementById("mensagem").value = "";
+  document.getElementById("btn-salvar").style.display = "inline-block";
+  document.getElementById("btn-atualizar").style.display = "none";
+  document.getElementById("btn-excluir").style.display = "none";
+}
+
+</script>
+
+
