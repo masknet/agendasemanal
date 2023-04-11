@@ -1,191 +1,225 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-<head>
-	<title>Agenda Semanal</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<!-- Bootstrap -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/jquery.slick/1.6.0/slick.css"/>
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-	<!-- Firebase -->
-	<script src="https://www.gstatic.com/firebasejs/8.3.3/firebase-app.js"></script>
-	<script src="https://www.gstatic.com/firebasejs/8.3.3/firebase-database.js"></script>
-	<!-- Configuração do Firebase -->
-	<script src="firebase.js"></script>
-	<style>
-		/* Estilo global */
-		* {
-			font-size: 20px;
-		}
-		
-		.container {
-			padding-top: 50px;
-			padding-bottom: 50px;
-		}
+  <head>
+    <meta charset="UTF-8">
+    <title>Avisos Semanais</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Bootstrap -->
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/jquery.slick/1.6.0/slick.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.3.3/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.3.3/firebase-database.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-auth.js"></script>
+    <!-- Configuração do Firebase -->
+    <script src="firebase.js"></script>
+	
+    <style>
+      /* Estilo global */
+      * {
+        font-size: 20px;
+      }
 
-		.slide {
-			padding: 20px;
-			color: #fff;
-			background-color: #4f0080;
-		}
+      .container {
+        padding-top: 50px;
+        padding-bottom: 50px;
+      }
 
-		@media only screen and (min-width: 768px) {
-			.container {
-				padding-top: 20px;
-				padding-bottom: 20px;
-			}
+      .slide {
+        padding: 20px;
+        color: #fff;
+        background-color: #4f0080;
+      }
 
-			.slide {
-				padding: 50px;
-			}
+      @media only screen and (min-width: 768px) {
+        .container {
+          padding-top: 20px;
+          padding-bottom: 20px;
+        }
 
-      footer {
-   position: fixed;
-   left: 0;
-   bottom: 0;
-   width: 100%;
-   background-color: #f5f5f5;
-   padding: 20px;
-   text-align: center;
-}
+        .slide {
+          padding: 50px;
+        }
 
+        footer {
+          position: fixed;
+          left: 0;
+          bottom: 0;
+          width: 100%;
+          background-color: #f5f5f5;
+          padding: 20px;
+          text-align: center;
+        }
 
-.social-icons li {
-	display: inline-block;
-	margin-left: 10px;
-	margin-right: 10px;
-}
+        .social-icons li {
+          display: inline-block;
+          margin-left: 10px;
+          margin-right: 10px;
+        }
 
-.social-icons li:first-child {
-	margin-left: 0;
-}
+        .social-icons li:first-child {
+          margin-left: 0;
+        }
 
-.social-icons li:last-child {
-	margin-right: 0;
-}
+        .social-icons li:last-child {
+          margin-right: 0;
+        }
 
-.social-icons a {
-	color: #333;
-}
+        .social-icons a {
+          color: #333;
+        }
 
-.social-icons a:hover {
-	color: #4f0080;
-}
+        .social-icons a:hover {
+          color: #4f0080;
+        }
 
-@media only screen and (max-width: 767px) {
-	footer {
-		padding-top: 10px;
-		padding-bottom: 10px;
-	}
-
-	.social-icons li {
-		margin-left: 5px;
-		margin-right: 5px;
-	}
-}
-
-		}
-	</style>
-	<nav class="navbar navbar-default">
-		<div class="container-fluid">
-			<ul class="nav navbar-nav">
-				<li class="active"><a href="#">Início</a></li>
-				<li><a href="#">Em construção</a></li>
-				<li><a href="#">Em construção</a></li>
-			</ul>
-			<ul class="nav navbar-nav navbar-right">
-  <li><a href="#" id="logout"><span class="glyphicon glyphicon-log-out"></span> Sair</a></li>
-</ul>
-		</div>
-	</nav>
-</head>
-<body>
-	<!-- lista de avisos -->
-	<div class="container">
-		<h2>Agenda Semanal</h2>
-		<div class="slider" id="lista-avisos"></div>
-	</div>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/jquery.slick/1.6.0/slick.min.js"></script>
-	<script>
-  $(document).ready(function(){
-    // exibir lista de avisos
-    const slider = $("#lista-avisos");
-    firebase.database().ref("avisos").on("value", snapshot => {
-      slider.html("");
-      snapshot.forEach(childSnapshot => {
-        const childData = childSnapshot.val();
-        const slide = $("<div>").addClass("slide");
-        slide.html(`${childData.dia} - ${childData.titulo} - ${childData.data} - ${childData.hora} - ${childData.observacoes}`);
-        slider.append(slide);
-      });
-
-				// cria o slider com o Slick Carousel
-      slider.slick({
-        slidesToShow: 1,
-        autoplay: true,
-        autoplaySpeed: 2000,
-        arrows: false,
-        responsive: [
-          {
-            breakpoint: 768,
-            settings: {
-              slidesToShow: 1,
-              slidesToScroll: 1
-            }
-          },
-          {
-            breakpoint: 480,
-            settings: {
-              slidesToShow: 1,
-              slidesToScroll: 1
-            }
+        @media only screen and (max-width: 767px) {
+          footer {
+            padding-top: 10px;
+            padding-bottom: 10px;
           }
-        ]
-      });
-    });
 
-    // Responsividade do menu toggle
-    $(".navbar-toggle").click(function(){
-      $(this).toggleClass("active");
-    });
+          .social-icons li {
+            margin-left: 5px;
+            margin-right: 5px;
+          }
+        }
+      }
+    </style>
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="#">Início</a></li>
+          <li><a href="#">Sobre</a></li>
+          <li><a href="#">Contato</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="#" id="logout"
+              ><span class="glyphicon glyphicon-log-out"></span> Sair</a
+            >
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </head>
+  
+  <body>
+    <!-- lista de avisos -->
+    <div class="container">
+      <h2>Avisos Semanais</h2>
+      <div class="slider" id="lista-avisos"></div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/jquery.slick/1.6.0/slick.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        // exibir lista de avisos
+        const slider = $("#lista-avisos");
+        firebase
+          .database()
+          .ref("avisos")
+          .on("value", (snapshot) => {
+            slider.html("");
+            snapshot.forEach((childSnapshot) => {
+              const childData = childSnapshot.val();
+              const slide = $("<div>").addClass("slide");
+              slide.html(
+                `${childData.dia} - ${childData.titulo} - ${childData.data} - ${childData.hora} - ${childData.observacoes}`
+              );
+              slider.append(slide);
+            });
 
-    // Logout
-    $("#logout").click(function(){
-      firebase.auth().signOut().then(function() {
-        // Redireciona para a página de login/cadastro
-        window.location.href = "login.html";
-      }).catch(function(error) {
-        console.log(error.message);
+            // cria o slider com o Slick Carousel
+            slider.slick({
+              slidesToShow: 1,
+              autoplay: true,
+              autoplaySpeed: 2000,
+              arrows: false,
+              responsive: [
+                {
+                  breakpoint: 768,
+                  settings: {
+                    slidesToShow: 1,
+                    slidesToScroll: 1,
+                  },
+                },
+                {
+                  breakpoint: 480,
+                  settings: {
+                    slidesToShow: 1,
+                    slidesToScroll: 1,
+                  },
+                },
+              ],
+            });
+          });
+
+        // Responsividade do menu toggle
+        $(".navbar-toggle").click(function () {
+          $(this).toggleClass("active");
+        });
+
+        // Logout
+        $(document).on("click", "#logout", function () {
+          firebase
+            .auth()
+            .signOut()
+            .then(() => {
+              // Redireciona para a página de login/cadastro
+              window.location.href = "login.html";
+            })
+            .catch((error) => {
+              console.log(error.message);
+            });
+        });
       });
-    });
-  });
-</script>
-<footer>
-	<div class="container">
-		<hr>
-		<div class="row">
-			<div class="col-md-3">
-				<img src="logo-ADI.png" alt="Logotipo da Escola" style="max-width: 100px;">
-			</div>
-			<div class="col-md-6 text-center">
-				<p style="font-size: 16px;">&copy; 2023 ADI - Ariston. Todos os direitos reservados.</p>
-			</div>
-			<div class="col-md-3 text-right">
-				<ul class="social-icons">
-					<li><a href="#"><i class="fa fa-facebook"></i></a></li>
-					<li><a href="#"><i class="fa fa-youtube"></i></a></li>
-					<li><a href="#"><i class="fa fa-instagram"></i></a></li>
-				</ul>
-			</div>
-		</div>
-	</div>
+	  
+    </script>
+    <footer>
+  <div class="container">
+    <hr>
+    <div class="row">
+      <div class="col-md-3 col-sm-12 text-center">
+        <img src="logo-ADI.png" alt="Logotipo da Escola" style="max-width: 100px;">
+      </div>
+      <div class="col-md-6 col-sm-12 text-center">
+        <p style="font-size: 18px">&copy; 2023 ADI - Ariston. Todos os direitos reservados.</p>
+      </div>
+      <div class="col-md-3 col-sm-12 text-right">
+        <ul class="social-icons">
+          <li>
+            <a href="#"><i class="fa fa-facebook"></i></a>
+          </li>
+          <li>
+            <a href="#"><i class="fa fa-youtube"></i></a>
+          </li>
+          <li>
+            <a href="#"><i class="fa fa-instagram"></i></a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
 </footer>
-</body>
+
+  </body>
 </html>
 
-
-
-
-
+<script>
+  var usuario = localStorage.getItem('usuario');
+  var usuarioLogado = document.getElementById('usuario-logado');
+  usuarioLogado.innerHTML = 'Bem-vindo, ' + usuario;
+</script>
