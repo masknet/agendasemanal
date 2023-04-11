@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-<head>
+  <head>
+    <meta charset="UTF-8">
 	<title>Adicionar Aviso</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 	<!-- Bootstrap -->
@@ -13,6 +14,7 @@
 	<!-- Firebase -->
 	<script src="https://www.gstatic.com/firebasejs/8.3.3/firebase-app.js"></script>
 	<script src="https://www.gstatic.com/firebasejs/8.3.3/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-auth.js"></script>
 
 	<!-- Configuração do Firebase -->
 	<script>
@@ -29,6 +31,19 @@
 		// Inicialização do Firebase
 		firebase.initializeApp(firebaseConfig);
 		var database = firebase.database();
+
+    firebase.auth().onAuthStateChanged(function(user) {
+  if (!user) {
+    window.location.href = "login.html"; // redireciona para a página de login se não estiver logado
+  }
+  else {
+    // continua com o código da página admin.html
+  }
+});
+
+
+    
+
 	</script>
 </head>
 <body>
@@ -209,5 +224,3 @@ function limparCampos() {
 }
 
 </script>
-
-
