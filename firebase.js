@@ -1,5 +1,5 @@
     var firebaseConfig = {
-		apiKey: "AIzaSyBkrBLKuklZgPm1nz2G997ULiYycZMb9F8",
+		  apiKey: "AIzaSyBkrBLKuklZgPm1nz2G997ULiYycZMb9F8",
       authDomain: "avisoseeventos.firebaseapp.com",
       databaseURL: "https://avisoseeventos-default-rtdb.firebaseio.com",
       projectId: "avisoseeventos",
@@ -11,3 +11,10 @@
 	// Inicialização do Firebase
 	firebase.initializeApp(firebaseConfig);
 	var database = firebase.database();
+
+
+  firebase.auth().onAuthStateChanged(function(user) {
+  if (!user) {
+    window.location.replace("login.html");
+  }
+});
